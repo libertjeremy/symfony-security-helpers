@@ -9,8 +9,8 @@
     ],
     "require": {
         "php": "^8.3",
-        "symfony/security-core": "^6.4 || ^7.2",
-        "symfony/string": "^6.4 || ^7.2"
+        "symfony/security-core": "^6.4 || ^7.0",
+        "symfony/string": "^6.4 || ^7.0"
     },
     "autoload": {
         "psr-4": {
