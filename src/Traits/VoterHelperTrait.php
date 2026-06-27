@@ -4,12 +4,23 @@ declare(strict_types=1);
 
 namespace LibertJeremy\Symfony\SecurityHelpers\Traits;
 
+use LibertJeremy\Symfony\SecurityHelpers\Voter\VoterMetadata;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use function Symfony\Component\String\u;
 
 trait VoterHelperTrait
 {
     protected const string VOTER_PREFIX = 'voter.';
+
+    /**
+     * Métadonnées résolues une seule fois par classe concrète (les constantes
+     * sont immuables au runtime). Clé = static::class pour rester correct malgré
+     * l'héritage : une propriété statique de trait est partagée dans toute la
+     * hiérarchie qui ne la redéclare pas.
+     *
+     * @var array<class-string, VoterMetadata>
+     */
+    private static array $voterMetadataCache = [];
 
     protected function supports(string $attribute, mixed $subject): bool
     {
@@ -23,17 +34,15 @@ trait VoterHelperTrait
             return false;
         }
 
-        return \in_array($attribute, $this->getAttributes());
+        return $this->voterMetadata()->supports($attribute);
     }
 
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
     {
-        $attributes = array_flip($this->getAttributes());
+        $function = $this->voterMetadata()->methodFor($attribute);
 
-        $function = $this->convertAttributeKeyToFunctionIfNeeded($attributes[$attribute]);
-
-        if (!method_exists($this, $function)) {
-            throw new \LogicException(sprintf('Unable to vote on attribute "%s". Method "%s" not found in %s', $attribute, $function, static::class));
+        if (null === $function || !method_exists($this, $function)) {
+            throw new \LogicException(sprintf('Unable to vote on attribute "%s". Method "%s" not found in %s', $attribute, $function ?? '?', static::class));
         }
 
         return $this->$function($subject, $token);
@@ -44,21 +53,7 @@ trait VoterHelperTrait
      */
     protected function getAttributes(): array
     {
-        $returnAttributes = [];
-
-        foreach ((new \ReflectionClass($this))->getConstants() as $keyForPotentialAttribute => $potentialAttribute) {
-            if (
-                !\is_string($keyForPotentialAttribute)
-                || !\is_string($potentialAttribute)
-                || !$this->attributeIsValid($potentialAttribute)
-            ) {
-                continue;
-            }
-
-            $returnAttributes[$keyForPotentialAttribute] = $potentialAttribute;
-        }
-
-        return $returnAttributes;
+        return $this->voterMetadata()->getAttributes();
     }
 
     protected function attributeIsValid(string $attribute): bool
@@ -75,5 +70,27 @@ trait VoterHelperTrait
         }
 
         return $function;
+    }
+
+    private function voterMetadata(): VoterMetadata
+    {
+        return self::$voterMetadataCache[static::class] ??= $this->computeVoterMetadata();
+    }
+
+    private function computeVoterMetadata(): VoterMetadata
+    {
+        $attributes = [];
+        $methodsByAttribute = [];
+
+        foreach ((new \ReflectionClass($this))->getConstants() as $constantName => $constantValue) {
+            if (!\is_string($constantName) || !\is_string($constantValue) || !$this->attributeIsValid($constantValue)) {
+                continue;
+            }
+
+            $attributes[$constantName] = $constantValue;
+            $methodsByAttribute[$constantValue] = $this->convertAttributeKeyToFunctionIfNeeded($constantName);
+        }
+
+        return new VoterMetadata($attributes, $methodsByAttribute);
     }
 }
