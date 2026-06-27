@@ -40,7 +40,7 @@ trait VoterHelperTrait
     }
 
     /**
-     * @return array<string>
+     * @return array<string, string> nom de constante => valeur d'attribut ('voter.x.y')
      */
     protected function getAttributes(): array
     {
