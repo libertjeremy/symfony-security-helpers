@@ -70,7 +70,7 @@ trait VoterHelperTrait
     {
         $function = strtolower($attribute);
 
-        if (str_contains($function , '_')) {
+        if (str_contains($function, '_')) {
             $function = u($function)->camel()->toString();
         }
 
