@@ -11,12 +11,14 @@ namespace LibertJeremy\Symfony\SecurityHelpers\Voter;
 final class VoterMetadata implements VoterMetadataInterface
 {
     /**
-     * @param array<string, string> $attributes        nom de constante => valeur d'attribut ('voter.x.y')
-     * @param array<string, string> $methodsByAttribute valeur d'attribut => nom de méthode à invoquer
+     * @param array<string, string> $attributes         nom de constante => valeur d'attribut ('voter.x.y')
+     * @param array<string, string> $methodsByAttribute  valeur d'attribut => nom de méthode à invoquer
+     * @param array<string, bool>   $contextAttributes   valeur d'attribut => true si la méthode attend un VoterContext
      */
     public function __construct(
         private readonly array $attributes,
         private readonly array $methodsByAttribute,
+        private readonly array $contextAttributes,
     ) {
     }
 
@@ -42,5 +44,11 @@ final class VoterMetadata implements VoterMetadataInterface
     public function methodFor(string $attribute): ?string
     {
         return $this->methodsByAttribute[$attribute] ?? null;
+    }
+
+    #[\Override]
+    public function expectsContext(string $attribute): bool
+    {
+        return isset($this->contextAttributes[$attribute]);
     }
 }
