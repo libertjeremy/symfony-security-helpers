@@ -18,7 +18,7 @@ trait VoterHelperTrait
      * l'héritage : une propriété statique de trait est partagée dans toute la
      * hiérarchie qui ne la redéclare pas.
      *
-     * @var array<class-string, VoterMetadata>
+     * @var array<class-string, VoterMetadataInterface>
      */
     private static array $voterMetadataCache = [];
 
@@ -72,12 +72,12 @@ trait VoterHelperTrait
         return $function;
     }
 
-    private function voterMetadata(): VoterMetadata
+    private function voterMetadata(): VoterMetadataInterface
     {
         return self::$voterMetadataCache[static::class] ??= $this->computeVoterMetadata();
     }
 
-    private function computeVoterMetadata(): VoterMetadata
+    private function computeVoterMetadata(): VoterMetadataInterface
     {
         $attributes = [];
         $methodsByAttribute = [];
