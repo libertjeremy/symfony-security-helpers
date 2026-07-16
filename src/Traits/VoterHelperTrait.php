@@ -67,7 +67,9 @@ trait VoterHelperTrait
 
     protected function attributeIsValid(string $attribute): bool
     {
-        return str_starts_with($attribute, self::VOTER_PREFIX);
+        return
+            str_starts_with($attribute, self::VOTER_PREFIX)
+            && $attribute !== self::VOTER_PREFIX;
     }
 
     private function convertAttributeKeyToFunctionIfNeeded(string $attribute): string
