@@ -93,7 +93,7 @@ trait VoterHelperTrait
         $attributes = [];
         $methodsByAttribute = [];
 
-        foreach (($reflection = new \ReflectionClass($this))->getConstants() as $constantName => $constantValue) {
+        foreach (($reflection = new \ReflectionClass($this))->getConstants(\ReflectionClassConstant::IS_PUBLIC) as $constantName => $constantValue) {
             if (!\is_string($constantName) || !\is_string($constantValue) || !$this->attributeIsValid($constantValue)) {
                 continue;
             }
