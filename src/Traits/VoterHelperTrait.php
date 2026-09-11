@@ -92,18 +92,16 @@ trait VoterHelperTrait
     {
         $attributes = [];
         $methodsByAttribute = [];
+        $constantNamesByAttribute = [];
 
         foreach (($reflection = new \ReflectionClass($this))->getConstants(\ReflectionClassConstant::IS_PUBLIC) as $constantName => $constantValue) {
             if (!\is_string($constantValue) || !$this->attributeIsValid($constantValue)) {
                 continue;
             }
 
-            $conventionMethod = $this->convertAttributeKeyToFunctionIfNeeded($constantName);
-
-            trigger_error(sprintf('Resolving voter attribute "%s" by naming convention (constant "%s::%s" -> method "%s()") is deprecated. Declare the method with #[AsVoterFor(self::%s)] instead.', $constantValue, static::class, $constantName, $conventionMethod, $constantName), \E_USER_DEPRECATED);
-
             $attributes[$constantName] = $constantValue;
-            $methodsByAttribute[$constantValue] = $conventionMethod;
+            $methodsByAttribute[$constantValue] = $this->convertAttributeKeyToFunctionIfNeeded($constantName);
+            $constantNamesByAttribute[$constantValue] = $constantName;
         }
 
         $contextAttributes = [];
@@ -124,6 +122,22 @@ trait VoterHelperTrait
                 $methodsByAttribute[$attributeValue] = $method->getName();
                 $contextAttributes[$attributeValue] = true;
             }
+        }
+
+        // La dépréciation n'est émise qu'ICI, après la passe par attribut, et seulement pour les attributs
+        // RÉELLEMENT résolus par convention. Émise plus haut, sur la seule déclaration d'une constante, elle
+        // avertissait un voter déjà migré pour un mécanisme qu'il n'utilise plus : le message réclamait une
+        // migration qui ne pouvait pas le faire taire, donc personne ne pouvait y répondre.
+        foreach ($methodsByAttribute as $attributeValue => $methodName) {
+            if (isset($contextAttributes[$attributeValue])) {
+                continue;
+            }
+
+            if (!isset($constantNamesByAttribute[$attributeValue]) || !$reflection->hasMethod($methodName)) {
+                continue;
+            }
+
+            trigger_error(sprintf('Resolving voter attribute "%s" by naming convention (constant "%s::%s" -> method "%s()") is deprecated. Declare the method with #[AsVoterFor(self::%s)] instead.', $attributeValue, static::class, $constantName = $constantNamesByAttribute[$attributeValue], $methodName, $constantName), \E_USER_DEPRECATED);
         }
 
         return new VoterMetadata($attributes, $methodsByAttribute, $contextAttributes);
