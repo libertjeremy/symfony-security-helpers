@@ -10,6 +10,7 @@ use LibertJeremy\Symfony\SecurityHelpers\Voter\VoterMetadata;
 use LibertJeremy\Symfony\SecurityHelpers\Voter\VoterMetadataInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Vote;
+
 use function Symfony\Component\String\u;
 
 trait VoterHelperTrait
@@ -49,7 +50,7 @@ trait VoterHelperTrait
         $function = $metadata->methodFor($attribute);
 
         if (null === $function || !method_exists($this, $function)) {
-            throw new \LogicException(sprintf('Unable to vote on attribute "%s". Method "%s" not found in %s', $attribute, $function ?? '?', static::class));
+            throw new \LogicException(\sprintf('Unable to vote on attribute "%s". Method "%s" not found in %s', $attribute, $function ?? '?', static::class));
         }
 
         if ($metadata->expectsContext($attribute)) {
@@ -139,7 +140,7 @@ trait VoterHelperTrait
                 continue;
             }
 
-            trigger_error(sprintf('Resolving voter attribute "%s" by naming convention (constant "%s::%s" -> method "%s()") is deprecated. Declare the method with #[AsVoterFor(self::%s)] instead.', $attributeValue, static::class, $constantName = $constantNamesByAttribute[$attributeValue], $methodName, $constantName), \E_USER_DEPRECATED);
+            @trigger_error(\sprintf('Resolving voter attribute "%s" by naming convention (constant "%s::%s" -> method "%s()") is deprecated. Declare the method with #[AsVoterFor(self::%s)] instead.', $attributeValue, static::class, $constantName = $constantNamesByAttribute[$attributeValue], $methodName, $constantName), \E_USER_DEPRECATED);
         }
 
         return new VoterMetadata($attributes, $methodsByAttribute, $contextAttributes);
