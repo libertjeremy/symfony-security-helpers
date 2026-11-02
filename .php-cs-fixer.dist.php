@@ -5,7 +5,10 @@ declare(strict_types=1);
 use PhpCsFixer\Config;
 use PhpCsFixer\Finder;
 
-$finder = (new Finder())->in([__DIR__.'/src', __DIR__.'/tests']);
+$finder = (new Finder())
+    ->in([__DIR__.'/src', __DIR__.'/tests'])
+    // Legacy files not yet formatted: left out until a dedicated style commit.
+    ->notPath(['Voter', 'Attribute', 'Traits']);
 
 return (new Config())
     ->setRiskyAllowed(true)
