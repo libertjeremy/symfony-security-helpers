@@ -54,10 +54,10 @@ trait VoterHelperTrait
         }
 
         if ($metadata->expectsContext($attribute)) {
-            return $this->$function(new VoterContext($subject, $token));
+            return true === $this->$function(new VoterContext($subject, $token));
         }
 
-        return $this->$function($subject, $token);
+        return true === $this->$function($subject, $token);
     }
 
     /**
@@ -72,7 +72,7 @@ trait VoterHelperTrait
     {
         return
             str_starts_with($attribute, self::VOTER_PREFIX)
-            && $attribute !== self::VOTER_PREFIX;
+            && self::VOTER_PREFIX !== $attribute;
     }
 
     private function convertAttributeKeyToFunctionIfNeeded(string $attribute): string
