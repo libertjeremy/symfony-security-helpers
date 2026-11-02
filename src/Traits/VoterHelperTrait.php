@@ -72,7 +72,7 @@ trait VoterHelperTrait
     {
         return
             str_starts_with($attribute, self::VOTER_PREFIX)
-            && self::VOTER_PREFIX !== $attribute;
+            && $attribute !== self::VOTER_PREFIX;
     }
 
     private function convertAttributeKeyToFunctionIfNeeded(string $attribute): string
