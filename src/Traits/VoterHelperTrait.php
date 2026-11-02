@@ -9,6 +9,7 @@ use LibertJeremy\Symfony\SecurityHelpers\Voter\VoterContext;
 use LibertJeremy\Symfony\SecurityHelpers\Voter\VoterMetadata;
 use LibertJeremy\Symfony\SecurityHelpers\Voter\VoterMetadataInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use function Symfony\Component\String\u;
 
 trait VoterHelperTrait
@@ -40,7 +41,8 @@ trait VoterHelperTrait
         return $this->voterMetadata()->supports($attribute);
     }
 
-    protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
+    /** `$vote` matches Symfony 8's abstract signature; being optional, it stays compatible with 6.4 and 7. */
+    protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token, ?Vote $vote = null): bool
     {
         $metadata = $this->voterMetadata();
 
