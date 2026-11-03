@@ -54,10 +54,10 @@ trait VoterHelperTrait
         }
 
         if ($metadata->expectsContext($attribute)) {
-            return $this->$function(new VoterContext($subject, $token));
+            return true === $this->$function(new VoterContext($subject, $token));
         }
 
-        return $this->$function($subject, $token);
+        return true === $this->$function($subject, $token);
     }
 
     /**
